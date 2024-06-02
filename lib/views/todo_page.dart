@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_sample/repository/todo_repository.dart';
 
-class TodoPage extends StatelessWidget {
+class TodoPage extends ConsumerWidget {
   const TodoPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final todoStream =
-        Supabase.instance.client.from('todos').stream(primaryKey: ['id']);
-    TextEditingController todoController = TextEditingController();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final todoRepositoryNotifier = ref.read(todoRepositoryProvider.notifier);
+    final todoStream = todoRepositoryNotifier.stream();
+    TextEditingController titleController = TextEditingController();
+    TextEditingController descriptionController = TextEditingController();
 
     return Scaffold(
       appBar: AppBar(
@@ -21,20 +23,18 @@ class TodoPage extends StatelessWidget {
             return const Center(
               child: CircularProgressIndicator(),
             );
-          } else if (
-              !snapshot.hasData) {
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(
               child: Text('データが登録されていません'),
             );
           } else {
             final todos = snapshot.data!;
-
             return ListView.builder(
               itemCount: todos.length,
               itemBuilder: (context, index) {
                 return ListTile(
-                  title: Text(todos[index]['body']),
-                  subtitle: Text(todos[index]['created_at']),
+                  title: Text(todos[index]['title']),
+                  subtitle: Text(todos[index]['description']),
                   trailing: SizedBox(
                     width: 100,
                     child: Row(
@@ -50,19 +50,20 @@ class TodoPage extends StatelessWidget {
                                       horizontal: 10),
                                   children: [
                                     TextFormField(
-                                      controller: todoController,
+                                      controller: titleController,
+                                    ),
+                                    TextFormField(
+                                      controller: descriptionController,
                                     ),
                                     ElevatedButton(
                                         onPressed: () async {
-                                          await Supabase.instance.client
-                                              .from('todos')
-                                              .update({
-                                            'body': todoController.text
-                                          }).match(
-                                            {
-                                              'id': todos[index]['id'],
-                                            },
+                                          await todoRepositoryNotifier.update(
+                                            todoId: todos[index]['id'],
+                                            title: titleController.text,
+                                            description:
+                                                descriptionController.text,
                                           );
+                                          if (!context.mounted) return;
                                           Navigator.pop(context);
                                         },
                                         child: const Text('Put'))
@@ -77,13 +78,8 @@ class TodoPage extends StatelessWidget {
                         ),
                         IconButton(
                           onPressed: () async {
-                            await Supabase.instance.client
-                                .from('todos')
-                                .delete()
-                                .match(
-                              {
-                                'id': todos[index]['id'],
-                              },
+                            await todoRepositoryNotifier.delete(
+                              todoId: todos[index]['id'],
                             );
                           },
                           icon: const Icon(
@@ -102,26 +98,35 @@ class TodoPage extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showDialog(
-              context: context,
-              builder: (context) {
-                return SimpleDialog(
-                  title: const Text('Add Todo'),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 10),
-                  children: [
-                    TextFormField(
-                      controller: todoController,
+            context: context,
+            builder: (context) {
+              return SimpleDialog(
+                title: const Text('Add Todo'),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+                children: [
+                  TextFormField(
+                    controller: titleController,
+                  ),
+                  TextFormField(
+                    controller: descriptionController,
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      await todoRepositoryNotifier.insert(
+                        title: titleController.text,
+                        description: descriptionController.text,
+                      );
+                      if (!context.mounted) return;
+                      Navigator.pop(context);
+                    },
+                    child: const Text(
+                      'Post',
                     ),
-                    ElevatedButton(
-                        onPressed: () async {
-                          await Supabase.instance.client
-                              .from('todos')
-                              .insert({'body': todoController.text});
-                          Navigator.pop(context);
-                        },
-                        child: const Text('Post'))
-                  ],
-                );
-              });
+                  ),
+                ],
+              );
+            },
+          );
         },
         child: const Icon(Icons.add),
       ),

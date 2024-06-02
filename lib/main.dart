@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:supabase_sample/views/todo_page.dart';
 
@@ -10,7 +11,7 @@ void main() async {
     url: dotenv.get('VAR_URL'),
     anonKey: dotenv.get('VAR_ANONKEY'),
   );
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
