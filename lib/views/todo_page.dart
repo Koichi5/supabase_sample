@@ -39,7 +39,7 @@ class TodoPage extends HookConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Todos'),
+        title: const Text('Todo List'),
         actions: [
           IconButton(
             onPressed: () {

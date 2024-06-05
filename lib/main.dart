@@ -8,8 +8,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
   await Supabase.initialize(
-    url: dotenv.get('VAR_URL'),
-    anonKey: dotenv.get('VAR_ANONKEY'),
+    url: dotenv.get('SUPABASE_URL'),
+    anonKey: dotenv.get('SUPABASE_ANONKEY'),
   );
   runApp(const ProviderScope(child: MyApp()));
 }
