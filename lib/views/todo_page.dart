@@ -16,21 +16,17 @@ class TodoPage extends HookConsumerWidget {
     const limitCount = 3;
     final isFilteredByWeek = useState(false);
     final isFilteredByTitle = useState(false);
-    final isFilteredByTitleContain = useState(false);
     final isLimited = useState(false);
     final isOrderedByCreatedAt = useState(false);
     final filterTitleController = useTextEditingController();
-    final filterTitleContainController = useTextEditingController();
     final todoRepositoryNotifier = ref.read(todoRepositoryProvider.notifier);
     final todoStream = todoRepositoryNotifier.stream(
       condition: FilterCondition(
         isFilteredByWeek: isFilteredByWeek.value,
         isFilteredByTitle: isFilteredByTitle.value,
-        isFilteredByTitleContain: isFilteredByTitleContain.value,
         isLimited: isLimited.value,
         isOrderedByCreatedAt: isOrderedByCreatedAt.value,
         filterTitle: filterTitleController.text,
-        filterTitleContain: filterTitleContainController.text,
         limitCount: limitCount,
       ),
     );
@@ -45,131 +41,101 @@ class TodoPage extends HookConsumerWidget {
             onPressed: () {
               showDialog(
                 context: context,
-                builder: (context) =>
-                    StatefulBuilder(builder: (context, setState) {
-                  return SimpleDialog(
-                    title: const Text('フィルター'),
-                    contentPadding: const EdgeInsets.all(24),
-                    children: [
-                      Column(
-                        children: [
-                          Row(
-                            children: [
-                              const Text('１週間前まで'),
-                              const Spacer(),
-                              Switch(
-                                value: isFilteredByWeek.value,
-                                onChanged: (value) {
-                                  setState(
-                                    () {
-                                      isFilteredByWeek.value = value;
-                                    },
-                                  );
-                                },
-                              )
-                            ],
-                          ),
-                          const Gap(8),
-                          Row(
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text('タイトル名（完全一致）'),
-                                  if (isFilteredByTitle.value)
-                                    SizedBox(
-                                      width: 150,
-                                      height: 50,
-                                      child: TextField(
-                                        controller: filterTitleController,
+                builder: (context) => StatefulBuilder(
+                  builder: (context, setState) {
+                    return SimpleDialog(
+                      title: const Text('フィルター'),
+                      contentPadding: const EdgeInsets.all(24),
+                      children: [
+                        Column(
+                          children: [
+                            Row(
+                              children: [
+                                const Text('１週間前まで'),
+                                const Spacer(),
+                                Switch(
+                                  value: isFilteredByWeek.value,
+                                  onChanged: (value) {
+                                    setState(
+                                      () {
+                                        isFilteredByWeek.value = value;
+                                      },
+                                    );
+                                  },
+                                )
+                              ],
+                            ),
+                            const Gap(8),
+                            Row(
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('タイトル名（完全一致）'),
+                                    if (isFilteredByTitle.value)
+                                      SizedBox(
+                                        width: 150,
+                                        height: 50,
+                                        child: TextField(
+                                          controller: filterTitleController,
+                                        ),
                                       ),
-                                    ),
-                                ],
-                              ),
-                              const Spacer(),
-                              Switch(
-                                value: isFilteredByTitle.value,
-                                onChanged: (value) {
-                                  setState(
-                                    () {
-                                      isFilteredByTitle.value = value;
-                                    },
-                                  );
-                                },
-                              )
-                            ],
-                          ),
-                          const Gap(8),
-                          Row(
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text('タイトル名（部分一致）'),
-                                  if (isFilteredByTitleContain.value)
-                                    SizedBox(
-                                      width: 150,
-                                      height: 50,
-                                      child: TextField(
-                                        controller:
-                                            filterTitleContainController,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                              const Spacer(),
-                              Switch(
-                                value: isFilteredByTitleContain.value,
-                                onChanged: (value) {
-                                  setState(
-                                    () {
-                                      isFilteredByTitleContain.value = value;
-                                    },
-                                  );
-                                },
-                              )
-                            ],
-                          ),
-                          const Gap(8),
-                          Row(
-                            children: [
-                              const Text('作成日時 昇順'),
-                              const Spacer(),
-                              Switch(
-                                value: isOrderedByCreatedAt.value,
-                                onChanged: (value) {
-                                  setState(
-                                    () {
-                                      isOrderedByCreatedAt.value = value;
-                                    },
-                                  );
-                                },
-                              )
-                            ],
-                          ),
-                          const Gap(8),
-                          Row(
-                            children: [
-                              const Text('TODOを3つに絞る'),
-                              const Spacer(),
-                              Switch(
-                                value: isLimited.value,
-                                onChanged: (value) {
-                                  setState(
-                                    () {
-                                      isLimited.value = value;
-                                    },
-                                  );
-                                },
-                              )
-                            ],
-                          ),
-                          const Gap(8),
-                        ],
-                      )
-                    ],
-                  );
-                }),
+                                  ],
+                                ),
+                                const Spacer(),
+                                Switch(
+                                  value: isFilteredByTitle.value,
+                                  onChanged: (value) {
+                                    setState(
+                                      () {
+                                        isFilteredByTitle.value = value;
+                                      },
+                                    );
+                                  },
+                                )
+                              ],
+                            ),
+                            const Gap(8),
+                            Row(
+                              children: [
+                                const Text('作成日時 昇順'),
+                                const Spacer(),
+                                Switch(
+                                  value: isOrderedByCreatedAt.value,
+                                  onChanged: (value) {
+                                    setState(
+                                      () {
+                                        isOrderedByCreatedAt.value = value;
+                                      },
+                                    );
+                                  },
+                                )
+                              ],
+                            ),
+                            const Gap(8),
+                            Row(
+                              children: [
+                                const Text('TODOを3つに絞る'),
+                                const Spacer(),
+                                Switch(
+                                  value: isLimited.value,
+                                  onChanged: (value) {
+                                    setState(
+                                      () {
+                                        isLimited.value = value;
+                                      },
+                                    );
+                                  },
+                                )
+                              ],
+                            ),
+                            const Gap(8),
+                          ],
+                        )
+                      ],
+                    );
+                  },
+                ),
               );
             },
             icon: const Icon(Icons.filter_list),
@@ -310,7 +276,7 @@ class TodoPage extends HookConsumerWidget {
                       Navigator.pop(context);
                     },
                     child: const Text(
-                      'Post',
+                      'Add',
                     ),
                   ),
                 ],
